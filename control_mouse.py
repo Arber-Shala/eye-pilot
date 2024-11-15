@@ -33,7 +33,7 @@ mouse.click('left')
 print(mouse.get_position())
 
 # https://www.youtube.com/watch?v=kbdbZFT9NQI
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face
 
@@ -45,26 +45,22 @@ while True:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # turn video to grayscale to save computation
     faces = detector(gray)
     for face in faces:
-        x1, y1 = face.left(), face.top()
-        x2, y2 = face.right(), face.bottom()
-        cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
-        print(face)
-    
-
+        # face detection
         x1, y1 = face.left(), face.top()
         x2, y2 = face.right(), face.bottom()
         cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
             
         # eye detection
         landmarks = predictor(gray, face)
-        #print(landmarks.part(39)) # print coordinate of inner eye
+
 
         left_point = (landmarks.part(31).x, landmarks.part(31).y)
         right_point = (landmarks.part(35).x, landmarks.part(35).y)
         center_top = midpoint(landmarks.part(30), landmarks.part(30))
         center_bottom = midpoint(landmarks.part(33), landmarks.part(33))
-        horizontal_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2) # create a horizontal line across the eye
+        horizontal_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2) # create a horizontal line across the nose
         vertical_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
+        print(center_top)
 
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1)
