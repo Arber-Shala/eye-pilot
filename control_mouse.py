@@ -3,20 +3,20 @@ import subprocess
 import sys
 
 # # https://stackoverflow.com/questions/12332975/how-can-i-install-a-python-module-within-code
-# def install(package):
-#     '''
-#     This function installs required libraries in function runtime so judges don't have to install packages to run code
-#     input: package
-#     output: installs the package to local PC
-#     '''
-#     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-# # install the mouse package
-# install("mouse")
-# install("opencv-python")
-# install("numpy")
-# install("cmake")
-# install("dlib")
-# install("pyglet")
+def install(package):
+    '''
+    This function installs required libraries in function runtime so judges don't have to install packages to run code
+    input: package
+    output: installs the package to local PC
+    '''
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+# install the mouse package
+install("mouse")
+install("opencv-python")
+install("numpy")
+install("cmake")
+install("dlib")
+install("pyglet")
 
 # import packages
 import mouse
@@ -33,9 +33,6 @@ print(mouse.get_position())
 
 # https://www.youtube.com/watch?v=kbdbZFT9NQI
 cap = cv2.VideoCapture(0)
-
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face, such as location of eyes
 
 def midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
