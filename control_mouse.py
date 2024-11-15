@@ -1,7 +1,10 @@
 # This file allows the user to control the mouse using eye movements and input from the Muse headset.
-import subprocess
-import sys
 from pygrabber.dshow_graph import FilterGraph
+import cv2
+import numpy as np
+import dlib 
+
+
 
 def get_available_cameras() :
 
@@ -15,33 +18,6 @@ def get_available_cameras() :
     return available_cameras
 
 
-# # https://stackoverflow.com/questions/12332975/how-can-i-install-a-python-module-within-code
-def install(package):
-    '''
-    This function installs required libraries in function runtime so judges don't have to install packages to run code
-    input: package
-    output: installs the package to local PC
-    '''
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-
-# install the mouse package
-install("mouse")
-install("opencv-python==4.10.0.84")
-install("numpy")
-install("cmake")
-install("dlib")
-install("pyglet")
-install("pygrabber")
-
-
-# import packages
-import mouse
-import cv2
-import numpy as np
-import dlib 
-from math import hypot
-import pyglet 
-import time
 
 def midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
