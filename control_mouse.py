@@ -13,7 +13,7 @@ def install(package):
 
 # install the mouse package
 # install("mouse")
-# install("opencv-python")
+# install("opencv-python==4.10.0.84")
 # install("numpy")
 # install("cmake")
 # install("dlib")
@@ -28,16 +28,6 @@ from math import hypot
 import pyglet 
 import time
 
-
-# click left button of mouse
-mouse.click('left')
-print(mouse.get_position())
-
-# https://www.youtube.com/watch?v=kbdbZFT9NQI
-cap = cv2.VideoCapture(1)
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face
-
 def midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
 
@@ -50,43 +40,51 @@ def movementV2(middle, new_position):
         mouse.move(x_movement, y_movement, False, 0.2)
         # time.sleep(0.2)
 
-count = 0
-while True:
-    _, frame = cap.read()
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # turn video to grayscale to save computation
-    faces = detector(gray)
-    for face in faces:
-        # face detection
-        x1, y1 = face.left(), face.top()
-        x2, y2 = face.right(), face.bottom()
-        cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
-            
-        # nose detection
-        landmarks = predictor(gray, face)
 
 
-        left_point = (landmarks.part(31).x, landmarks.part(31).y)
-        right_point = (landmarks.part(35).x, landmarks.part(35).y)
-        center_top = midpoint(landmarks.part(30), landmarks.part(30))
-        center_bottom = midpoint(landmarks.part(33), landmarks.part(33))
-        horizontal_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2) # create a horizontal line across the nose
-        vertical_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
-        # make the starting position of the nose as the reference for all mouse movements
-        if(count == 0):
-            middle = center_top
-            count += 1
+if __name__ == "__main__":
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    detector = dlib.get_frontal_face_detector()
+    predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face
+
+    count = 0
+    while True:
         
-        print(center_top)
-        print(middle)
-        movementV2(middle, center_top)
+        _, frame = cap.read()
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # turn video to grayscale to save computation
+        faces = detector(gray)
+        for face in faces:
+            # face detection
+            x1, y1 = face.left(), face.top()
+            x2, y2 = face.right(), face.bottom()
+            cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
+                
+            # nose detection
+            landmarks = predictor(gray, face)
 
-    cv2.imshow("Frame", frame)
-    key = cv2.waitKey(1)
-    if key == 27: # if the esc key is pressed
-        break
 
-cap.release()
-cv2.destroyAllWindows()
+            left_point = (landmarks.part(31).x, landmarks.part(31).y)
+            right_point = (landmarks.part(35).x, landmarks.part(35).y)
+            center_top = midpoint(landmarks.part(30), landmarks.part(30))
+            center_bottom = midpoint(landmarks.part(33), landmarks.part(33))
+            horizontal_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2) # create a horizontal line across the nose
+            vertical_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
+            # make the starting position of the nose as the reference for all mouse movements
+            if(count == 0):
+                middle = center_top
+                count += 1
+            
+            print(center_top)
+            print(middle)
+            movementV2(middle, center_top)
+
+        cv2.imshow("Frame", frame)
+        key = cv2.waitKey(1)
+        if key == 27: # if the esc key is pressed
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
 
 
 # while True:
