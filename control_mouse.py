@@ -26,6 +26,7 @@ import numpy as np
 import dlib 
 from math import hypot
 import pyglet 
+import time
 
 
 # click left button of mouse
@@ -40,6 +41,19 @@ predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load
 def midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
 
+def movementV2(middle, new_position):
+    x1, y1 = middle
+    x2, y2 = new_position
+    x_movement = x1 - x2
+    y_movement = y2 - y1
+    if abs(x_movement) >= 30 or abs(y_movement) >= 30:
+        print("MOVE MOUSE")
+        mouse.move(x_movement, y_movement, False, 0.2)
+        print("x_movement", x_movement)
+        print("y_movement", y_movement)
+        # time.sleep(0.2)
+
+count = 0
 while True:
     _, frame = cap.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # turn video to grayscale to save computation
@@ -60,7 +74,14 @@ while True:
         center_bottom = midpoint(landmarks.part(33), landmarks.part(33))
         horizontal_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2) # create a horizontal line across the nose
         vertical_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
+        # make the starting position of the nose as the reference for all mouse movements
+        if(count == 0):
+            middle = center_top
+            count += 1
+        
         print(center_top)
+        print(middle)
+        movementV2(middle, center_top)
 
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1)
