@@ -85,10 +85,10 @@ if __name__ == "__main__":
             if(count == 0):
                 middle = avg_point #center_top
                 count += 1
-            
             print(center_top)
             print(middle)
             movementV2(middle, avg_point)  # center_top
+
 
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1)
