@@ -45,12 +45,7 @@ while True:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # turn video to grayscale to save computation
     faces = detector(gray)
     for face in faces:
-        x1, y1 = face.left(), face.top()
-        x2, y2 = face.right(), face.bottom()
-        cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
-        
-    
-
+        # face detection
         x1, y1 = face.left(), face.top()
         x2, y2 = face.right(), face.bottom()
         cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
@@ -65,7 +60,7 @@ while True:
         center_bottom = midpoint(landmarks.part(33), landmarks.part(33))
         horizontal_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2) # create a horizontal line across the nose
         vertical_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
-        print(center_bottom)
+        print(center_top)
 
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1)
