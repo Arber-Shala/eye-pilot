@@ -94,15 +94,22 @@ if __name__ == "__main__":
             right_point = (landmarks.part(35).x, landmarks.part(35).y)
             center_top = midpoint(landmarks.part(30), landmarks.part(30))
             center_bottom = midpoint(landmarks.part(33), landmarks.part(33))
-            
+
+            avg_point_x = int(left_point[0] + right_point[0] + center_top[0] + center_bottom[0] / 4)
+            avg_point_y = int(left_point[1] + right_point[1] + center_top[1] + center_bottom[1] / 4)
+            #print("avg_point_x", avg_point_x)
+            avg_point = (avg_point_x, avg_point_y)
+
             horizontal_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2) # create a horizontal line across the nose
             vertical_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
             # make the starting position of the nose as the reference for all mouse movements
             if(count == 0):
-                middle = center_top
+                middle = avg_point #center_top
                 count += 1
-            
-            movementV2(middle, center_top)
+            print(center_top)
+            print(middle)
+            movementV2(middle, avg_point)  # center_top
+
 
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1)
