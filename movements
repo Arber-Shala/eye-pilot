@@ -1,0 +1,12 @@
+import mouse
+import time
+
+
+def movementV2(middle, new_position):
+    x1, y1 = middle
+    x2, y2 = new_position
+    x_movement = x2 - x1
+    y_movement = y1 - y2
+    if abs(x_movement) >= 10 or abs(y_movement) >= 10:
+        mouse.move(x_movement, y_movement, False, 0.2)
+        time.sleep(0.2)
