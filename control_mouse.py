@@ -2,8 +2,8 @@
 from pygrabber.dshow_graph import FilterGraph
 import cv2
 import numpy as np
-import dlib 
-
+import dlib
+import mouse
 
 
 def get_available_cameras() :
