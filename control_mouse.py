@@ -43,7 +43,13 @@ def movementV2(middle, new_position):
 
 
 if __name__ == "__main__":
-    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    choice = ""
+    choice = input("choose camera, front or back: ")
+    if(choice == "front"):
+        cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+    elif(choice == "back"):
+        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face
 
@@ -67,6 +73,7 @@ if __name__ == "__main__":
             right_point = (landmarks.part(35).x, landmarks.part(35).y)
             center_top = midpoint(landmarks.part(30), landmarks.part(30))
             center_bottom = midpoint(landmarks.part(33), landmarks.part(33))
+            
             horizontal_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2) # create a horizontal line across the nose
             vertical_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
             # make the starting position of the nose as the reference for all mouse movements
