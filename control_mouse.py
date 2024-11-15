@@ -43,6 +43,7 @@ def movementV2(middle, new_position):
 
 
 if __name__ == "__main__":
+    p
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face
@@ -74,8 +75,6 @@ if __name__ == "__main__":
                 middle = center_top
                 count += 1
             
-            print(center_top)
-            print(middle)
             movementV2(middle, center_top)
 
         cv2.imshow("Frame", frame)
