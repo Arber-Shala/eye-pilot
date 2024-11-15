@@ -1,6 +1,19 @@
 # This file allows the user to control the mouse using eye movements and input from the Muse headset.
 import subprocess
 import sys
+from pygrabber.dshow_graph import FilterGraph
+
+def get_available_cameras() :
+
+    devices = FilterGraph().get_input_devices()
+
+    available_cameras = {}
+
+    for device_index, device_name in enumerate(devices):
+        available_cameras[device_index] = device_name
+
+    return available_cameras
+
 
 # # https://stackoverflow.com/questions/12332975/how-can-i-install-a-python-module-within-code
 def install(package):
@@ -12,12 +25,14 @@ def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
 # install the mouse package
-# install("mouse")
-# install("opencv-python==4.10.0.84")
-# install("numpy")
-# install("cmake")
-# install("dlib")
-# install("pyglet")
+install("mouse")
+install("opencv-python==4.10.0.84")
+install("numpy")
+install("cmake")
+install("dlib")
+install("pyglet")
+install("pygrabber")
+
 
 # import packages
 import mouse
@@ -43,12 +58,18 @@ def movementV2(middle, new_position):
 
 
 if __name__ == "__main__":
+    
+    print("Pick a device id from the list")
+    print("device id: device name")
     choice = ""
-    choice = input("choose camera, front or back: ")
-    if(choice == "front"):
-        cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
-    elif(choice == "back"):
-        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    for devid, devname in get_available_cameras().items():
+        print(f"{devid}: {devname}")
+
+
+    while not choice.isdigit() or choice == "":
+        choice = input("choose video device id: ")
+    choice = int(choice)
+    cap = cv2.VideoCapture(choice, cv2.CAP_DSHOW)
 
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face
