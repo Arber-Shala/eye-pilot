@@ -47,10 +47,7 @@ def movementV2(middle, new_position):
     x_movement = x1 - x2
     y_movement = y2 - y1
     if abs(x_movement) >= 30 or abs(y_movement) >= 30:
-        print("MOVE MOUSE")
         mouse.move(x_movement, y_movement, False, 0.2)
-        print("x_movement", x_movement)
-        print("y_movement", y_movement)
         # time.sleep(0.2)
 
 count = 0
@@ -64,7 +61,7 @@ while True:
         x2, y2 = face.right(), face.bottom()
         cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
             
-        # eye detection
+        # nose detection
         landmarks = predictor(gray, face)
 
 
