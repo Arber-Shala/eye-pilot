@@ -1,17 +1,86 @@
 import argparse
 import time
+import pyqtgraph as pg
+from pyqtgraph.Qt import QtGui, QtCore
+import logging
 
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds, LogLevels
-from brainflow.data_filter import DataFilter
+from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations
 from brainflow.ml_model import MLModel, BrainFlowMetrics, BrainFlowClassifiers, BrainFlowModelParams
+
+class Graph:
+    def __init__(self, board_shim):
+        self.board_id = board_shim.get_board_id()
+        self.board_shim = board_shim
+        self.exg_channels = BoardShim.get_exg_channels(self.board_id)
+        self.sampling_rate = BoardShim.get_sampling_rate(self.board_id)
+        self.update_speed_ms = 50
+        self.window_size = 4
+        self.num_points = self.window_size * self.sampling_rate
+
+        self.app = QtGui.QApplication([])
+        self.win = pg.GraphicsWindow(title='BrainFlow Plot', size=(800, 600))
+
+        self._init_timeseries()
+
+        timer = QtCore.QTimer()
+        timer.timeout.connect(self.update)
+        timer.start(self.update_speed_ms)
+        QtGui.QApplication.instance().exec_()
+
+    def _init_timeseries(self):
+        self.plots = list()
+        self.curves = list()
+        for i in range(len(self.exg_channels)):
+            p = self.win.addPlot(row=i, col=0)
+            p.showAxis('left', False)
+            p.setMenuEnabled('left', False)
+            p.showAxis('bottom', False)
+            p.setMenuEnabled('bottom', False)
+            if i == 0:
+                p.setTitle('TimeSeries Plot')
+            self.plots.append(p)
+            curve = p.plot()
+            self.curves.append(curve)
+
+    def update(self):
+        data = self.board_shim.get_current_board_data(self.num_points)
+        for count, channel in enumerate(self.exg_channels):
+            # plot timeseries
+            DataFilter.detrend(data[channel], DetrendOperations.CONSTANT.value)
+            DataFilter.perform_bandpass(data[channel], self.sampling_rate, 3.0, 45.0, 2,
+                                        FilterTypes.BUTTERWORTH_ZERO_PHASE, 0)
+            DataFilter.perform_bandstop(data[channel], self.sampling_rate, 48.0, 52.0, 2,
+                                        FilterTypes.BUTTERWORTH_ZERO_PHASE, 0)
+            DataFilter.perform_bandstop(data[channel], self.sampling_rate, 58.0, 62.0, 2,
+                                        FilterTypes.BUTTERWORTH_ZERO_PHASE, 0)
+            self.curves[count].setData(data[channel].tolist())
+
+        self.app.processEvents()
+
 
 
 def main():
     print()
     BoardShim.enable_dev_board_logger()
+    logging.basicConfig(level=logging.DEBUG)
 
     params = BrainFlowInputParams()
-    board = BoardShim(BoardIds.MUSE_2_BOARD, params)
+    board_shim = BoardShim(BoardIds.MUSE_2_BOARD, params)
+
+    try:
+        board_shim.prepare_session()
+        board_shim.start_stream(450000) # ,args.steamer_params
+        Graph(board_shim)
+    except BaseException:
+        logging.warning('Exception', exc_info=True)
+    finally:
+        logging.info('End')
+        if board_shim.is_prepared():
+            logging.info('Releasing session')
+            board_shim.release_session()
+
+    '''
     master_board_id = board.get_board_id()
     sampling_rate = BoardShim.get_sampling_rate(master_board_id)
     board.prepare_session()
@@ -40,30 +109,6 @@ def main():
     restfulness.prepare()
     print('Restfulness: %s' % str(restfulness.predict(feature_vector)))
     restfulness.release()
-
-    '''
-    params = BrainFlowInputParams()
-    params.ip_port = args.ip_port
-    params.serial_port = args.serial_port
-    params.mac_address = args.mac_address
-    params.other_info = args.other_info
-    params.serial_number = args.serial_number
-    params.ip_address = args.ip_address
-    params.ip_protocol = args.ip_protocol
-    params.timeout = args.timeout
-    params.file = args.file
-    params.master_board = args.master_board
-
-    board = BoardShim(args.board_id, params)
-    board.prepare_session()
-    board.start_stream ()
-    time.sleep(10)
-    # data = board.get_current_board_data (256) # get latest 256 packages or less, doesnt remove them from internal buffer
-    data = board.get_board_data()  # get all data and remove it from internal buffer
-    board.stop_stream()
-    board.release_session()
-
-    print(data)
     '''
 
 if __name__ == "__main__":
