@@ -12,12 +12,12 @@ def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
 # install the mouse package
-# install("mouse")
-# install("opencv-python")
-# install("numpy")
-# install("cmake")
-# install("dlib")
-# install("pyglet")
+#install("mouse")
+#install("opencv-python")
+#install("numpy")
+#install("cmake")
+#install("dlib")
+#install("pyglet")
 
 # import packages
 import mouse
@@ -46,8 +46,8 @@ def movementV2(middle, new_position):
     x2, y2 = new_position
     x_movement = x1 - x2
     y_movement = y2 - y1
-    if abs(x_movement) >= 30 or abs(y_movement) >= 30:
-        mouse.move(x_movement, y_movement, False, 0.2)
+    if abs(x_movement) >= 20 or abs(y_movement) >= 20:
+        mouse.move(x_movement * 1.2, y_movement * 1.2, False, 0.2)
         # time.sleep(0.2)
 
 count = 0
@@ -76,8 +76,8 @@ while True:
             middle = center_top
             count += 1
         
-        print(center_top)
-        print(middle)
+        #print(center_top)
+        #print(middle)
         movementV2(middle, center_top)
 
     cv2.imshow("Frame", frame)
