@@ -12,12 +12,12 @@ def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
 # install the mouse package
-install("mouse")
-install("opencv-python")
-install("numpy")
-install("cmake")
-install("dlib")
-install("pyglet")
+# install("mouse")
+# install("opencv-python")
+# install("numpy")
+# install("cmake")
+# install("dlib")
+# install("pyglet")
 
 # import packages
 import mouse
