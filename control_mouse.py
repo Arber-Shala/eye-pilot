@@ -61,9 +61,6 @@ if __name__ == "__main__":
                 
             # nose detection
             landmarks = predictor(gray, face)
-            #print(center_top)
-            #print(middle)
-            movementV2(middle, center_top)
 
 
             left_point = (landmarks.part(31).x, landmarks.part(31).y)
