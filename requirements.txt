@@ -1,0 +1,7 @@
+mouse
+opencv-python==4.10.0.84
+numpy
+cmake
+dlib
+pyglet
+pygrabber
