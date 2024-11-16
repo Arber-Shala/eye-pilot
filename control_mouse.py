@@ -3,7 +3,7 @@ from pygrabber.dshow_graph import FilterGraph
 import cv2
 import numpy as np
 import dlib
-import mouse
+from pynput.mouse import Button, Controller
 import time
 
 
@@ -31,10 +31,10 @@ def movementV2(middle, new_position, dt):
 
     x_movement = x1 - x2
     y_movement = y2 - y1
-
+    mouse = Controller()
 
     if abs(x_movement) >= deadzone or abs(y_movement) >= deadzone:
-        mouse.move(x_movement * speed * dt, y_movement * speed * dt, False, 0.2)
+        mouse.move(x_movement * speed * dt, y_movement * speed * dt)
 
 
 
