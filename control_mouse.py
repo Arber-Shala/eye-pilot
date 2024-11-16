@@ -102,7 +102,7 @@ if __name__ == "__main__":
             print("middle:", middle)
             # draw a circle where the center point is
             # https://stackoverflow.com/questions/49799057/how-to-draw-a-point-in-an-image-using-given-co-ordinate-with-python-opencv
-            # cv2.circle(frame, (middle_x,middle_y), radius=0, color=(0, 0, 255), thickness=5)
+            cv2.circle(frame, (middle[0],middle[1]), radius=0, color=(0, 0, 255), thickness=5)
 
 
             movementV2(middle, avg_point, dt)  # center_top
