@@ -7,6 +7,7 @@ import math
 import torch
 import numpy as np
 from model import QLearner
+import time
 
 class MainLiveRLWindow(QtWidgets.QMainWindow):
     
@@ -84,6 +85,10 @@ class MainLiveRLWindow(QtWidgets.QMainWindow):
         self.timer.timeout.connect(self.update_plot)
         self.timer.start()
 
+        self.last_action = None     # Keeps track of last action taken
+        self.last_action_time = 0
+        self.cooldown_seconds = 1   # Cooldown time between actions (NEEDS TO BE TUNED)
+
     def update_plot(self):
         data = self.board_shim.get_current_board_data(self.num_baseline_samples + self.num_samples) #Gets the latest num_baseline_samples + num_samples from board
         baseline_data = data[:,:self.num_baseline_samples] #Isolates the baseline data
@@ -99,11 +104,23 @@ class MainLiveRLWindow(QtWidgets.QMainWindow):
         #Performs training step and gets the selected action and predicted rewards from the RL model
         selected_action, predicted_rewards = self.learner.get_action(flat_fft_mag)
         print("Predicted rewards:", [reward.item() for reward in predicted_rewards])
-        try:
-            self.action_functions[selected_action]()
-        except Exception as e:
-            print(e)
-            print("Could not call function for action:", selected_action)
+
+
+        current_time = time.time()
+        # If the selected action is different from the last action and the cooldown time has passed, 
+        # call the function for the selected action
+        if (
+            self.last_action != selected_action and
+            (current_time - self.last_action_time) > self.cooldown_seconds
+        ):
+            try:
+                self.action_functions[selected_action]()
+                self.last_action = selected_action
+                self.last_action_time = current_time
+                
+            except Exception as e:
+                print(e)
+                print("Could not call function for action:", selected_action)
 
         #Updates the predictions for each action on the plot
         for action in range(self.num_actions):
