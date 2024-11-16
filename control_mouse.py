@@ -23,8 +23,8 @@ def midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
 
 def movementV2(middle, new_position, dt):
-    deadzone = [] # square in the callibrated center where the mouse does not move
-    speed = 4
+    speed = 5
+    deadzone = 25  # deadzone amt
 
     x1, y1 = middle
     x2, y2 = new_position
@@ -32,11 +32,9 @@ def movementV2(middle, new_position, dt):
     x_movement = x1 - x2
     y_movement = y2 - y1
 
-    print("x_movement", x_movement)
-    print("y_movement", y_movement)
-    if abs(x_movement) >= 20 or abs(y_movement) >= 20:
+
+    if abs(x_movement) >= deadzone or abs(y_movement) >= deadzone:
         mouse.move(x_movement * speed * dt, y_movement * speed * dt, False, 0.2)
-        # time.sleep(0.2)
 
 
 
@@ -65,6 +63,7 @@ if __name__ == "__main__":
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # turn video to grayscale to save computation
         faces = detector(gray)
 
+
         for face in faces:
             # face detection
             x1, y1 = face.left(), face.top()
@@ -82,25 +81,21 @@ if __name__ == "__main__":
 
             avg_point_x = int((left_point[0] + right_point[0] + center_top[0] + center_bottom[0]) / 4)
             avg_point_y = int((left_point[1] + right_point[1] + center_top[1] + center_bottom[1]) / 4)
-            #print("avg_point_x", avg_point_x)
             avg_point = (avg_point_x, avg_point_y)
 
             horizontal_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2) # create a horizontal line across the nose
             vertical_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
+
             # make the starting position of the nose as the reference for all mouse movements
             if(count == 0):
                 middle = avg_point #center_top
                 count += 1
+
+            
             #https://stackoverflow.com/questions/9734821/how-to-find-the-center-coordinate-of-rectangle
+            frame = cv2.putText(frame, str(avg_point), (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 
+                   1, (255, 255, 255), 2, cv2.LINE_AA)
 
-            # middle_x = int((x1 + x2) / 2)
-            # middle_y = int((y1 + y2) / 2)
-            # middle = (middle_x, middle_y)
-
-
-            print("avg_point", avg_point)
-            print("middle:", middle)
-            # draw a circle where the center point is
             # https://stackoverflow.com/questions/49799057/how-to-draw-a-point-in-an-image-using-given-co-ordinate-with-python-opencv
             cv2.circle(frame, (middle[0],middle[1]), radius=0, color=(0, 0, 255), thickness=5)
 
