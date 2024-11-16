@@ -21,6 +21,6 @@ board = hecatron.init_board(serial_port, board_id)
 
 hecatron.start_eeg_plot(board)
 
-hecatron.run_training_session(board, num_actions=2, reference_channels=[0], filename="test_run_4")
+hecatron.run_training_session(board, num_actions=2, reference_channels=[0], filename="models/test_run_4")
 
-hecatron.run_live_session(board, num_actions=2, reference_channels=[0], filename="test_run_4")
+hecatron.run_live_session(board, num_actions=2, reference_channels=[0], filename="models/test_run_4")

@@ -137,12 +137,12 @@ def start_eeg_plot(board, update_speed_ms=50, window_size=4, num_points=250):
 # one_hot_value: Value of selected action in one hot vector
 # filename: Prefix of save file name
 # save_freq: Saves the model every save_freq timesteps
-def run_training_session(board, num_actions=2, num_samples=125, num_baseline_samples=50, update_speed_ms=50, window_size=4, num_points=250, reference_channels=[], epsilon=5e-2, alpha=1e-4, eta=1e-2, one_hot_value=1e3, filename="default_model", save_freq=100):
+def run_training_session(board, num_actions=2, num_samples=125, num_baseline_samples=50, update_speed_ms=50, window_size=4, num_points=250, reference_channels=[], epsilon=5e-2, alpha=1e-4, eta=1e-2, one_hot_value=1e3, filename="default_model", save_freq=100, plot=False):
     try:
         board.start_stream(450000)
         time.sleep(5)
         app = QtWidgets.QApplication([])
-        main = MainTrainRLWindow(board, num_actions, num_samples, num_baseline_samples, update_speed_ms, window_size, num_points, reference_channels, epsilon, alpha, eta, one_hot_value, filename, save_freq)
+        main = MainTrainRLWindow(board, num_actions, num_samples, num_baseline_samples, update_speed_ms, window_size, num_points, reference_channels, epsilon, alpha, eta, one_hot_value, filename, save_freq, plot=plot)
         main.show()
         app.exec()
     except Exception as e:

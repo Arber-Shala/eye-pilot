@@ -5,7 +5,12 @@ import numpy as np
 import dlib
 import mouse
 import time
+from pynput.mouse import Button, Controller
 
+from real_time_learning import hecatron
+from real_time_learning.rlplot_live import MainLiveRL
+
+pynput_mouse = Controller()
 
 def get_available_cameras() :
 
@@ -40,6 +45,13 @@ def movementV2(middle, new_position, dt):
 
 
 
+def func():
+    pass
+
+def click():
+    pynput_mouse.click(Button.left)
+
+
 if __name__ == "__main__":
     
     print("Pick a device id from the list")
@@ -56,8 +68,15 @@ if __name__ == "__main__":
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face
 
+    # eeg board and model
+    board = hecatron.init_board(None, 38)
+    eeg_model = MainLiveRL(board, [func, click], "models/test_run_4") # model to make predictions
     count = 0
     dt = 0.06
+    action_cooldown = 0.2 # cooldown between action predictions from RL model in seconds
+    last_action_time = time.time()
+    last_action = None
+
     while True:
         prev = time.time()
         
@@ -107,11 +126,17 @@ if __name__ == "__main__":
 
             movementV2(middle, avg_point, dt)  # center_top
 
-        dt = time.time()-prev
+        current_time = time.time()
+        dt = current_time-prev
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1)
         if key == 27: # if the esc key is pressed
             break
+
+        if (current_time - last_action_time > action_cooldown):
+            selected_action = eeg_model.query_model()
+            last_action_time = current_time
+            last_action = selected_action
 
     cap.release()
     cv2.destroyAllWindows()
