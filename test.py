@@ -62,6 +62,8 @@ class Graph:
 
 def main():
     print()
+    print(int(BoardIds.MUSE_2_BOARD))
+    '''
     BoardShim.enable_dev_board_logger()
     logging.basicConfig(level=logging.DEBUG)
 
@@ -80,7 +82,7 @@ def main():
             logging.info('Releasing session')
             board_shim.release_session()
 
-    '''
+    
     master_board_id = board.get_board_id()
     sampling_rate = BoardShim.get_sampling_rate(master_board_id)
     board.prepare_session()
