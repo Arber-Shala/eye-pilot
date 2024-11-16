@@ -29,9 +29,6 @@ def movementV2(middle, new_position, dt):
     x1, y1 = middle
     x2, y2 = new_position
 
-    # x_movement = x1 - x2
-    # y_movement = y2 - y1
-
     x_movement = x1 - x2
     y_movement = y2 - y1
 
@@ -91,20 +88,20 @@ if __name__ == "__main__":
             horizontal_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2) # create a horizontal line across the nose
             vertical_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
             # make the starting position of the nose as the reference for all mouse movements
-            # if(count == 0):
-            #     middle = avg_point #center_top
-            #     count += 1
-            #https://stackoverflow.com/questions/9734821/how-to-find-the-center-coordinate-of-rectangle
-            middle_x = int((x1 + x2) / 2)
-            middle_y = int((y1 + y2) / 2)
-            middle = (middle_x, middle_y)
+            if(count == 0):
+                middle = avg_point #center_top
+                count += 1
+            # https://stackoverflow.com/questions/9734821/how-to-find-the-center-coordinate-of-rectangle
+            # middle_x = int((x1 + x2) / 2)
+            # middle_y = int((y1 + y2) / 2)
+            # middle = (middle_x, middle_y)
 
 
             print("avg_point", avg_point)
             print("middle:", middle)
             # draw a circle where the center point is
             # https://stackoverflow.com/questions/49799057/how-to-draw-a-point-in-an-image-using-given-co-ordinate-with-python-opencv
-            cv2.circle(frame, (middle_x,middle_y), radius=0, color=(0, 0, 255), thickness=5)
+            # cv2.circle(frame, (middle_x,middle_y), radius=0, color=(0, 0, 255), thickness=5)
 
 
             movementV2(middle, avg_point, dt)  # center_top
