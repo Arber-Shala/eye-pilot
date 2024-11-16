@@ -23,8 +23,8 @@ def midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
 
 def movementV2(middle, new_position, dt):
-    speed = 5
-    deadzone = 25  # deadzone amt
+    speed = 3
+    deadzone = 17  # deadzone amt
 
     x1, y1 = middle
     x2, y2 = new_position
