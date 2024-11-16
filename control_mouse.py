@@ -86,11 +86,8 @@ if __name__ == "__main__":
             if(count == 0):
                 middle = avg_point #center_top
                 count += 1
-
-
+                
             movementV2(middle, avg_point, dt)  # center_top
-
-
 
         dt = time.time()-prev
         cv2.imshow("Frame", frame)
