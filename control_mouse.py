@@ -61,14 +61,17 @@ if __name__ == "__main__":
 
     
     count = 0
+    count_chin = 0
     dt = 0.06
     intial_face_coor = None
     set_face_coor = False
     _, frame = cap.read()
     screen_width, screen_height, _ = frame.shape
     face_outline_points = list(range(17))
-    print(face_outline_points)
+    face_outline_points = [30,31,33,35]
+    # print(face_outline_points)
     prev_face = None
+    z = 0
     while True:
         prev = time.time()
         
@@ -88,7 +91,7 @@ if __name__ == "__main__":
             if x2 > x1 and y2 > y1 and not set_face_coor and face_coor:
                 intial_face_coor = face_coor
                 set_face_coor = True
-                print("Set face coordinates location:", intial_face_coor)
+                # print("Set face coordinates location:", intial_face_coor)
             
             cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
 
@@ -97,14 +100,31 @@ if __name__ == "__main__":
             poly_points = np.array([ [int(landmarks.part(idx).x), int(landmarks.part(idx).y)] for idx in face_outline_points])
             # poly_points = np.array([[100,100], [100,200], [200,200],[200,100]], np.int32)
             # print(poly_points)
+            # print("landmarks.part(2)", landmarks.part(2))
+            # print("landmarks.part(14)", landmarks.part(14))
+            # print("landmarks.part(8): CHIN", landmarks.part(8))
             poly_points = poly_points.reshape(-1,1,2)
             cv2.fillPoly(frame, [poly_points], (255,255,255)) 
-
+            # CHANGES****************************
+            if(count_chin == 0): # calibrate where the chin is orginally so we can use how the chin moves to get a z-coordinate to calculate tilt
+                start_point = landmarks.part(8)
+                count_chin += 1
+            z = landmarks.part(8) - start_point
+            # CHANGES****************************
 
             left_point = (landmarks.part(31).x, landmarks.part(31).y)
+            rotZ = math.atan(landmarks.part(31).y/landmarks.part(31).x)
+
+            left_point_3D = (landmarks.part(31).x, landmarks.part(31).y, rotZ)
+
             right_point = (landmarks.part(35).x, landmarks.part(35).y)
+
             center_top = midpoint(landmarks.part(30), landmarks.part(30))
             center_bottom = midpoint(landmarks.part(33), landmarks.part(33))
+
+            # test rotations
+            rotZ = math.atan(landmarks.part(31).y/landmarks.part(31).x)
+            print("rotZ", rotZ)
 
             avg_point_x = int((left_point[0] + right_point[0] + center_top[0] + center_bottom[0]) / 4)
             avg_point_y = int((left_point[1] + right_point[1] + center_top[1] + center_bottom[1]) / 4)
