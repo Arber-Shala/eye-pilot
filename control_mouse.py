@@ -29,9 +29,6 @@ def movementV2(middle, new_position, dt):
     x1, y1 = middle
     x2, y2 = new_position
 
-    # x_movement = x1 - x2
-    # y_movement = y2 - y1
-
     x_movement = x1 - x2
     y_movement = y2 - y1
 
@@ -95,6 +92,7 @@ if __name__ == "__main__":
                 middle = avg_point #center_top
                 count += 1
             #https://stackoverflow.com/questions/9734821/how-to-find-the-center-coordinate-of-rectangle
+
             # middle_x = int((x1 + x2) / 2)
             # middle_y = int((y1 + y2) / 2)
             # middle = (middle_x, middle_y)
