@@ -5,7 +5,7 @@ import numpy as np
 import dlib
 import mouse
 import time
-
+import math
 
 def get_available_cameras() :
 
@@ -37,9 +37,14 @@ def movementV2(middle, new_position, dt):
         mouse.move(x_movement * speed * dt, y_movement * speed * dt, False, 0.2)
 
 
-
-if __name__ == "__main__":
+# def movement_direct(middle, new_pos, init_face_rect,screen_width, screen_height, dt):
+#     x1,y1,x2, y2 = init_face_rect
+#     per_x, per_y = (new_pos[0]/abs(x2-x1), new_pos[1]/abs(y2-y1))
     
+#     mouse.move(per_x*screen_width, per_y*screen_height, True, 0.1)
+
+
+if __name__ == "__main__":    
     print("Pick a device id from the list")
     print("device id: device name")
     choice = ""
@@ -54,24 +59,46 @@ if __name__ == "__main__":
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face
 
+    
     count = 0
     dt = 0.06
+    intial_face_coor = None
+    set_face_coor = False
+    _, frame = cap.read()
+    screen_width, screen_height, _ = frame.shape
+    face_outline_points = list(range(17))
+    print(face_outline_points)
+    prev_face = None
     while True:
         prev = time.time()
         
         _, frame = cap.read()
+    
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # turn video to grayscale to save computation
         faces = detector(gray)
 
-
-        for face in faces:
+        if faces:
+            face = faces[0]
             # face detection
+        if face:
             x1, y1 = face.left(), face.top()
             x2, y2 = face.right(), face.bottom()
+            face_coor =  (x1,y1,x2,y2)
+
+            if x2 > x1 and y2 > y1 and not set_face_coor and face_coor:
+                intial_face_coor = face_coor
+                set_face_coor = True
+                print("Set face coordinates location:", intial_face_coor)
+            
             cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
 
             # nose detection
             landmarks = predictor(gray, face)
+            poly_points = np.array([ [int(landmarks.part(idx).x), int(landmarks.part(idx).y)] for idx in face_outline_points])
+            # poly_points = np.array([[100,100], [100,200], [200,200],[200,100]], np.int32)
+            # print(poly_points)
+            poly_points = poly_points.reshape(-1,1,2)
+            cv2.fillPoly(frame, [poly_points], (255,255,255)) 
 
 
             left_point = (landmarks.part(31).x, landmarks.part(31).y)
@@ -94,14 +121,14 @@ if __name__ == "__main__":
             
             #https://stackoverflow.com/questions/9734821/how-to-find-the-center-coordinate-of-rectangle
             frame = cv2.putText(frame, str(avg_point), (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 
-                   1, (255, 255, 255), 2, cv2.LINE_AA)
+                    1, (255, 255, 255), 2, cv2.LINE_AA)
 
             # https://stackoverflow.com/questions/49799057/how-to-draw-a-point-in-an-image-using-given-co-ordinate-with-python-opencv
             cv2.circle(frame, (middle[0],middle[1]), radius=0, color=(0, 0, 255), thickness=5)
 
-
             movementV2(middle, avg_point, dt)  # center_top
-
+            # movementV2(middle, avg_point, dt)  # center_top
+        
         dt = time.time()-prev
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1)
