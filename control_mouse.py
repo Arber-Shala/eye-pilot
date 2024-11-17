@@ -5,10 +5,11 @@ import numpy as np
 import dlib
 import mouse
 import time
+from PyQt6 import QtCore, QtWidgets
 from pynput.mouse import Button, Controller
 
 from real_time_learning import hecatron
-from real_time_learning.rlplot_live import MainLiveRL
+from real_time_learning.rlplot_live import MainLiveRL, MainLiveRLWindow
 
 pynput_mouse = Controller()
 
@@ -40,7 +41,7 @@ def movementV2(middle, new_position, dt):
     print("x_movement", x_movement)
     print("y_movement", y_movement)
     if abs(x_movement) >= 20 or abs(y_movement) >= 20:
-        mouse.move(x_movement * speed * dt, y_movement * speed * dt, False, 0.2)
+        pynput_mouse.move(x_movement * speed * dt, y_movement * speed * dt)
         # time.sleep(0.2)
 
 
@@ -51,6 +52,22 @@ def func():
 def click():
     pynput_mouse.click(Button.left)
 
+
+response = input("Do you want to use a connected board? (y/n)")
+if response.lower() == 'y':
+    response = input("Search for board? (y/n)")
+    if response.lower() == 'y':
+        board_id, serial_port = hecatron.find_port_and_id()
+    else:
+        serial_port = input("Serial Port: ")
+        board_id = int(input("Board ID: "))
+else:
+    board_id = None
+    serial_port = None
+print("board_id:", board_id)
+print("serial_port:", serial_port)
+
+board = hecatron.init_board(serial_port, board_id)
 
 if __name__ == "__main__":
     
@@ -69,8 +86,12 @@ if __name__ == "__main__":
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face
 
     # eeg board and model
-    board = hecatron.init_board(None, 38)
-    eeg_model = MainLiveRL(board, [func, click], "models/test_run_4") # model to make predictions
+
+    eeg_model = MainLiveRLWindow(board, [func, click], "real_time_learning/models/best_model_yay") # model to make predictions
+    app = QtWidgets.QApplication([])
+    eeg_model.show()
+    app.exec()
+
     count = 0
     dt = 0.06
     action_cooldown = 0.2 # cooldown between action predictions from RL model in seconds
@@ -134,7 +155,10 @@ if __name__ == "__main__":
             break
 
         if (current_time - last_action_time > action_cooldown):
-            selected_action = eeg_model.query_model()
+            selected_action = eeg_model.last_action
+
+            print(selected_action)
+            print("action selected")
             last_action_time = current_time
             last_action = selected_action
 

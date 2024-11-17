@@ -6,8 +6,11 @@ import pyqtgraph as pg
 import math
 import torch
 import numpy as np
-from model import QLearner
+
 import time
+
+from real_time_learning.model import QLearner
+
 
 class MainLiveRL():
     # this class provides functionality for running the agent without the plot
@@ -41,9 +44,17 @@ class MainLiveRL():
         self.fft_min = torch.full((len(self.eeg_channels)-len(self.reference_channels), 1), float("Inf")) #Initializes the rolling minimum for normalizing FFT
         self.fft_max = torch.full((len(self.eeg_channels)-len(self.reference_channels), 1), float("-Inf")) #Initializes the rolling maximum for normalizing FFT
         num_fft_features = torch.flatten(torch.fft.fft(torch.zeros((len(self.eeg_channels)-len(self.reference_channels), self.num_samples)))).shape[0] #Calculates the total number of values in an FFT (the state features)
-        self.learner = QLearner(self.num_actions, num_fft_features, one_hot_value=one_hot_value, filename=filename) #Initializes reinforcement learning model
+        self.learner = QLearner(self.num_actions, num_fft_features - 125, one_hot_value=one_hot_value, filename=filename) #Initializes reinforcement learning model
+        print(num_fft_features)
         assert filename is not None, "filename is None."
         self.learner.load(filename)
+
+        ##########################################################
+
+
+
+
+        ###########################################################
 
         #Sets up line for plotting predictions for each action
         self.all_predictions = [] # probably don't need
@@ -84,7 +95,7 @@ class MainLiveRL():
         return selected_action
 
 class MainLiveRLWindow(QtWidgets.QMainWindow):
-    
+
     keyPressed = QtCore.pyqtSignal(QtCore.QEvent)
 
     # board_shim: The EEG board object that is read onto the plot
@@ -181,7 +192,7 @@ class MainLiveRLWindow(QtWidgets.QMainWindow):
 
 
         current_time = time.time()
-        # If the selected action is different from the last action and the cooldown time has passed, 
+        # If the selected action is different from the last action and the cooldown time has passed,
         # call the function for the selected action
         if (
             self.last_action != selected_action and
@@ -191,7 +202,7 @@ class MainLiveRLWindow(QtWidgets.QMainWindow):
                 self.action_functions[selected_action]()
                 self.last_action = selected_action
                 self.last_action_time = current_time
-                
+
             except Exception as e:
                 print(e)
                 print("Could not call function for action:", selected_action)

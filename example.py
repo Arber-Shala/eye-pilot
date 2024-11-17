@@ -1,4 +1,4 @@
-import hecatron
+from real_time_learning import hecatron
 
 # This example first tries to find an OpenBCI or Muse headset to use.
 # If it cannot find one, it uses a synthetic board.

@@ -2,18 +2,21 @@ import brainflow
 from brainflow.board_shim import BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
 from PyQt6 import QtCore, QtWidgets
-from graph import MainGraphWindow
-from rlplot import MainTrainRLWindow
-from rlplot_live import MainLiveRLWindow
-from model import QLearner
+
+from real_time_learning.graph import MainGraphWindow
+
+
 import random
 import time
 import torch
 
+from real_time_learning.rlplot import MainTrainRLWindow
+from real_time_learning.rlplot_live import MainLiveRLWindow
+
 SYNTHETIC_BOARD_ID = -1 #Board ID for simulation board
 SYNTHETIC_BOARD_PORT = ''
 BOARD_IDS = [38] #Only includes OpenBCI and Muse board IDs
-SERIAL_PORT_PREFIXES = ['COM', '/dev/ttyUSB']
+SERIAL_PORT_PREFIXES = ['COM0', '/dev/ttyUSB']
 SERIAL_PORT_SUFFIXES = list(range(0,11))
 
 def _action_0_default():
@@ -70,6 +73,7 @@ def find_port_and_id(serial_prefixes=SERIAL_PORT_PREFIXES, serial_suffixes=SERIA
 # debug: Enable debug mode
 def init_board(serial_port=None, board_id=None, debug=False):
     if serial_port is None:
+
         serial_port = SYNTHETIC_BOARD_PORT
     if board_id is None:
         board_id = SYNTHETIC_BOARD_ID
@@ -92,6 +96,7 @@ def init_board(serial_port=None, board_id=None, debug=False):
 
     board = BoardShim(board_id, params)
 
+    #board.prepare_session()
     try:
         board.prepare_session()
     except Exception as e:
@@ -142,7 +147,7 @@ def run_training_session(board, num_actions=2, num_samples=125, num_baseline_sam
         board.start_stream(450000)
         time.sleep(5)
         app = QtWidgets.QApplication([])
-        main = MainTrainRLWindow(board, num_actions, num_samples, num_baseline_samples, update_speed_ms, window_size, num_points, reference_channels, epsilon, alpha, eta, one_hot_value, filename, save_freq, plot=plot)
+        main = MainTrainRLWindow(board, num_actions, num_samples, num_baseline_samples, update_speed_ms, window_size, num_points, reference_channels, epsilon, alpha, eta, one_hot_value, filename, save_freq)
         main.show()
         app.exec()
     except Exception as e:
