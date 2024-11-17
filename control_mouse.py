@@ -3,7 +3,7 @@ from pygrabber.dshow_graph import FilterGraph
 import cv2
 import numpy as np
 import dlib
-import mouse
+from pynput.mouse import Button, Controller
 import time
 import math
 
@@ -23,18 +23,18 @@ def midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
 
 def movementV2(middle, new_position, dt):
-    speed = 5
-    deadzone = 25  # deadzone amt
+    speed = 3
+    deadzone = 17  # deadzone amt
 
     x1, y1 = middle
     x2, y2 = new_position
 
     x_movement = x1 - x2
     y_movement = y2 - y1
-
+    mouse = Controller()
 
     if abs(x_movement) >= deadzone or abs(y_movement) >= deadzone:
-        mouse.move(x_movement * speed * dt, y_movement * speed * dt, False, 0.2)
+        mouse.move(x_movement * speed * dt, y_movement * speed * dt)
 
 
 def line_intersection(line1, line2):

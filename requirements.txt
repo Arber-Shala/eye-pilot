@@ -5,4 +5,4 @@ cmake
 dlib
 pyglet
 pygrabber
-t
+pynput
