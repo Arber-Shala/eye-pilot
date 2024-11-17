@@ -71,22 +71,32 @@ inv_lerp = lambda x, a, b : (x - a) / (b - a)
 lndmark_get = lambda landmarks, idx : [landmarks.part(idx).x, landmarks.part(idx).y]
 
 def movement_nose(landmarks, screen_pos):
-    nose_points =  [30,31,51,35]
-    nose_top, nose_left, nose_bottom, nose_right = [lndmark_get(landmarks, idx)  for idx in nose_points]
-    nose_center = line_intersection([nose_top, nose_bottom], [nose_left, nose_right])
+    key_points =  [30,31,51,35]
+    top, left, bottom, right = [lndmark_get(landmarks, idx)  for idx in key_points]
     
-    hor_x = inv_lerp(nose_center[0], nose_right[0], nose_left[0])
-    ver_y = inv_lerp(nose_center[1], nose_bottom[1], nose_top[1])
-
-    cv2.putText(frame, f"({round(hor_x*100)}%, {round(ver_y*100)}%)", (0,20), cv2.FONT_HERSHEY_SIMPLEX, 
-                1, (0, 0, 0), 2, cv2.LINE_AA)
+    nose_center = line_intersection([top, bottom], [left, right])
     
 
+    hor_x = inv_lerp(nose_center[0], right[0], left[0])
+    ver_y = inv_lerp(nose_center[1], bottom[1], top[1])
+
+    #calibration of the values
     norm_x = inv_lerp(hor_x, 0.25, 0.65)
     norm_y = inv_lerp(ver_y, 0.3, 0.7)
 
+    cv2.putText(frame, f"({round(min(max(norm_x*100,0), 100))}%, {round(min(max(norm_y*100, 0), 100))}%)", (0,20), cv2.FONT_HERSHEY_SIMPLEX, 
+                1, (0, 0, 0), 2, cv2.LINE_AA)
+    
+    poly_points = np.array([top, left, bottom, right]).reshape(-1,1,2)
+    cv2.fillPoly(frame, [poly_points], (255,255,255))
+
+    # Draw the cross to show
+    cv2.line(frame, left, right, (0, 255, 0), 2)
+    cv2.line(frame, top, bottom, (0, 255, 0), 2)
+
     x = norm_x*screen_pos[0]
     y = norm_y*screen_pos[1]
+
 
     return (x,y)
 
@@ -138,9 +148,6 @@ if __name__ == "__main__":
     set_face_coor = False
     _, frame = cap.read()
     screen_width, screen_height, _ = frame.shape
-    face_outline_points = list(range(17))
-    face_outline_points = [30,31,51,35]
-    # print(face_outline_points)
     z = 0
     face = None
     i = 0
@@ -169,65 +176,38 @@ if __name__ == "__main__":
 
             # nose detection
             landmarks = predictor(gray, face)
-            poly_points = np.array([ [int(landmarks.part(idx).x), int(landmarks.part(idx).y)] for idx in face_outline_points])
-            # poly_points = np.array([[100,100], [100,200], [200,200],[200,100]], np.int32)
-            # print(poly_points)
-            # print("landmarks.part(2)", landmarks.part(2))
-            # print("landmarks.part(14)", landmarks.part(14))
-            # print("landmarks.part(8): CHIN", landmarks.part(8))
-            poly_points = poly_points.reshape(-1,1,2)
-            cv2.fillPoly(frame, [poly_points], (255,255,255)) 
-            # CHANGES****************************
-            if(count_chin == 0): # calibrate where the chin is orginally so we can use how the chin moves to get a z-coordinate to calculate tilt
-                start_point = landmarks.part(8)
-                count_chin += 1
-            z = landmarks.part(8) - start_point
-            # CHANGES****************************
+            
+            # z = landmarks.part(8) - start_point
 
-            left_point = (landmarks.part(31).x, landmarks.part(31).y)
-            rotZ = math.atan(landmarks.part(31).y/landmarks.part(31).x)
+            # left_point = (landmarks.part(31).x, landmarks.part(31).y)
+            # rotZ = math.atan(landmarks.part(31).y/landmarks.part(31).x)
 
-            left_point_3D = (landmarks.part(31).x, landmarks.part(31).y, rotZ)
+            # left_point_3D = (landmarks.part(31).x, landmarks.part(31).y, rotZ)
 
-            right_point = (landmarks.part(35).x, landmarks.part(35).y)
+            # right_point = (landmarks.part(35).x, landmarks.part(35).y)
 
-            center_top = midpoint(landmarks.part(30), landmarks.part(30))
-            center_bottom = midpoint(landmarks.part(33), landmarks.part(33))
+            # center_top = midpoint(landmarks.part(30), landmarks.part(30))
+            # center_bottom = midpoint(landmarks.part(33), landmarks.part(33))
 
             # test rotations
-            rotZ = math.atan(landmarks.part(31).y/landmarks.part(31).x)
-            # print("rotZ", rotZ)
+            # rotZ = math.atan(landmarks.part(31).y/landmarks.part(31).x)
+            # # print("rotZ", rotZ)
 
-            avg_point_x = int((left_point[0] + right_point[0] + center_top[0] + center_bottom[0]) / 4)
-            avg_point_y = int((left_point[1] + right_point[1] + center_top[1] + center_bottom[1]) / 4)
-            avg_point = (avg_point_x, avg_point_y)
-
-            horizontal_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2) # create a horizontal line across the nose
-            vertical_line = cv2.line(frame, center_top, (landmarks.part(51).x, landmarks.part(51).y), (0, 255, 0), 2)
+            # avg_point_x = int((left_point[0] + right_point[0] + center_top[0] + center_bottom[0]) / 4)
+            # avg_point_y = int((left_point[1] + right_point[1] + center_top[1] + center_bottom[1]) / 4)
+            # avg_point = (avg_point_x, avg_point_y)
 
             # make the starting position of the nose as the reference for all mouse movements
-            if(count == 0):
-                middle = avg_point #center_top
+            # if(count == 0):
+            #     middle = avg_point #center_top
 
-            
-            # cv2.putText(frame, str((round(nose_pos[0],2), round(nose_pos[1],2))), (0,20), cv2.FONT_HERSHEY_SIMPLEX, 
-            #         1, (255, 255, 255), 2, cv2.LINE_AA)
-
-            # https://stackoverflow.com/questions/49799057/how-to-draw-a-point-in-an-image-using-given-co-ordinate-with-python-opencv
-            cv2.circle(frame, (middle[0],middle[1]), radius=0, color=(0, 0, 255), thickness=5)
+            # # https://stackoverflow.com/questions/49799057/how-to-draw-a-point-in-an-image-using-given-co-ordinate-with-python-opencv
+            # cv2.circle(frame, (middle[0],middle[1]), radius=0, color=(0, 0, 255), thickness=5)
 
             # movementV2(middle, avg_point, dt)  # center_top
 
 
             x,y = movement_nose(landmarks, (1535, 863))
-            # if len(prev_movement_pos) > 1 and (abs(prev_movement_pos[-1][0]-x) > 100 or abs(prev_movement_pos[-1][1]-y) > 100):
-            #     prev_movement_pos = []
-                
-            # prev_movement_pos.append((x,y))
-
-            # if len(prev_movement_pos) > 10:
-            #     prev_movement_pos.pop(0)
-            # prev_avg_pos = average_position(prev_movement_pos)
             if (count == 0):
                 prev_avg_pos = (x,y)
 
