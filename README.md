@@ -7,9 +7,9 @@ Mind Pilot consists of two key components. The first component of Mind Pilot use
 
 # Instructions to run:
 1. pull from brainflow-eeg-working-hopefully branch
-2. Run ntwo python scripts
-  1. run control_click.py
-  2. then run control_mouse.py
+2. Run two python scripts
+   - run control_click.py
+   - then run control_mouse.py
 
 # Instructions for use:
 - To execute a click command, raise eyebrows.
