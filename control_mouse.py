@@ -6,6 +6,7 @@ import dlib
 import mouse
 import time
 import math
+import os
 
 def get_available_cameras() :
 
@@ -135,7 +136,11 @@ if __name__ == "__main__":
     while not choice.isdigit() or choice == "":
         choice = input("choose video device id: ")
     choice = int(choice)
-    cap = cv2.VideoCapture(choice, cv2.CAP_DSHOW)
+        
+    if os.name == "nt":
+        cap = cv2.VideoCapture(choice, cv2.CAP_DSHOW)
+    else:
+        cap = cv2.VideoCapture(choice)
 
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face
