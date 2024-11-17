@@ -9,6 +9,7 @@ import math
 import pyautogui 
 from tkinter import *
 from tkinter import colorchooser, ttk
+import customtkinter as ctk
 
 def get_available_cameras() :
 
@@ -45,13 +46,31 @@ def movementV2(middle, new_position, dt):
 #     per_x, per_y = (new_pos[0]/abs(x2-x1), new_pos[1]/abs(y2-y1))
     
 #     mouse.move(per_x*screen_width, per_y*screen_height, True, 0.1)
+class PythonApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        self.geometry('1000x1000')
+        frame1 = button_screen(master=self)
 
-def paint():
-    # importing pyautogui 
-    screenWidth, screenHeight = pyautogui.size() 
-    print(screenWidth)
-    
+class button_screen(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master=master, bg_color = '#9665eb')
+
+        self.title_label = ctk.CTkLabel(self, text='pyClock', text_color = '#f7c5fb')
+        self.title_label.grid(row=0, column=0)
+        self.button = ctk.CTkButton(self, text = 'Open paint', fg_color = '#f7c5fb', text_color = '#9665eb') #, command = paint(self.master))
+        self.button.grid(row=1, column=0)
+
+    # def open_paint(self):
+    #     win = Tk()
+    #     win.title("Paint App")
+    #     paint(self.master)
+    #     win.mainloop()
+
+
 class paint:
+    # Credit: https://github.com/pickry/Tkinter/blob/main/paint.py
+    
     def __init__(self, master):
         self.master = master
         self.color_fg = 'Black'
@@ -87,6 +106,8 @@ class paint:
         self.c['bg'] = self.color_bg
 
     def drawWidgets(self):
+        screenWidth, screenHeight = pyautogui.size() 
+
         self.controls = Frame(self.master, padx=5, pady=5)
         textpw = Label(self.controls, text='Pen Width', font='Georgia 16')
         textpw.grid(row=0, column=0)
@@ -94,7 +115,7 @@ class paint:
         self.slider.set(self.pen_width)
         self.slider.grid(row=0, column=1)
         self.controls.pack(side="left")
-        self.c = Canvas(self.master, width=500, height=400, bg=self.color_bg)
+        self.c = Canvas(self.master, width=screenWidth, height=screenHeight, bg=self.color_bg)
         self.c.pack(fill=BOTH, expand=True)
 
         menu = Menu(self.master)
@@ -112,11 +133,17 @@ class paint:
 
 
 if __name__ == "__main__": 
+    # calibrate
+    #
     # output paint application
-    win = Tk()
-    win.title("Paint App")
-    paint(win)
-    win.mainloop()
+    button_screen = PythonApp()
+    # # show button selection screen
+    # button_screen.mainloop()
+    
+    # win = Tk()
+    # win.title("Paint App")
+    # paint(win)
+    # win.mainloop()
 
     print("Pick a device id from the list")
     print("device id: device name")
@@ -146,6 +173,7 @@ if __name__ == "__main__":
     prev_face = None
     z = 0
     while True:
+        # create button frame
         prev = time.time()
         
         _, frame = cap.read()
