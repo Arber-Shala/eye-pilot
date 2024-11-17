@@ -3,7 +3,7 @@ from pygrabber.dshow_graph import FilterGraph
 import cv2
 import numpy as np
 import dlib
-from pynput.mouse import Button, Controller
+import mouse
 import time
 import math
 
@@ -23,18 +23,18 @@ def midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
 
 def movementV2(middle, new_position, dt):
-    speed = 3
-    deadzone = 17  # deadzone amt
+    speed = 5
+    deadzone = 25  # deadzone amt
 
     x1, y1 = middle
     x2, y2 = new_position
 
     x_movement = x1 - x2
     y_movement = y2 - y1
-    mouse = Controller()
+
 
     if abs(x_movement) >= deadzone or abs(y_movement) >= deadzone:
-        mouse.move(x_movement * speed * dt, y_movement * speed * dt)
+        mouse.move(x_movement * speed * dt, y_movement * speed * dt, False, 0.2)
 
 
 def line_intersection(line1, line2):
@@ -53,6 +53,19 @@ def line_intersection(line1, line2):
     y = det(d, ydiff) / div
     return x, y
 
+def average_position(positions):
+    if not positions:
+        raise ValueError("The list of positions is empty.")
+    
+    # Convert to a NumPy array for easier calculations
+    positions_array = np.array(positions)
+    
+    # Calculate the mean along the first axis (for each coordinate)
+    average = positions_array.mean(axis=0)
+    
+    # Convert back to a tuple
+    return tuple(average)
+
 lerp = lambda p1, p2, t: p1 + t * (p2 - p1)
 inv_lerp = lambda x, a, b : (x - a) / (b - a)
 lndmark_get = lambda landmarks, idx : [landmarks.part(idx).x, landmarks.part(idx).y]
@@ -65,7 +78,7 @@ def movement_nose(landmarks, screen_pos):
     hor_x = inv_lerp(nose_center[0], nose_right[0], nose_left[0])
     ver_y = inv_lerp(nose_center[1], nose_bottom[1], nose_top[1])
 
-    cv2.putText(frame, f"({hor_x*100}%, {ver_y*100}%)", (0,20), cv2.FONT_HERSHEY_SIMPLEX, 
+    cv2.putText(frame, f"({round(hor_x*100)}%, {round(ver_y*100)}%)", (0,20), cv2.FONT_HERSHEY_SIMPLEX, 
                 1, (0, 0, 0), 2, cv2.LINE_AA)
     
 
@@ -75,9 +88,32 @@ def movement_nose(landmarks, screen_pos):
     x = norm_x*screen_pos[0]
     y = norm_y*screen_pos[1]
 
+    return (x,y)
 
-    mouse.move(x, y, True, 0.1)
 
+def exponential_moving_average(new_pos, prev_avg_pos=None, alpha=0.3):
+    """
+    Compute the exponential moving average for smoothing mouse movements.
+    
+    Parameters:
+        new_pos (tuple): The current position (x, y).
+        prev_avg_pos (tuple): The previous EMA position (x, y). If None, start with the current position.
+        alpha (float): Smoothing factor (0 < alpha <= 1). Higher values are more responsive.
+    
+    Returns:
+        tuple: The updated EMA position (x, y).
+    """
+    if prev_avg_pos is None:
+        return new_pos  # Start with the first position if no previous average exists
+    
+    x_new, y_new = new_pos
+    x_prev, y_prev = prev_avg_pos
+    
+    # Apply EMA formula
+    x_avg = alpha * x_new + (1 - alpha) * x_prev
+    y_avg = alpha * y_new + (1 - alpha) * y_prev
+    
+    return x_avg, y_avg
 
 if __name__ == "__main__":    
     print("Pick a device id from the list")
@@ -107,6 +143,7 @@ if __name__ == "__main__":
     # print(face_outline_points)
     z = 0
     face = None
+    i = 0
     while True:
         prev = time.time()
         
@@ -114,7 +151,7 @@ if __name__ == "__main__":
     
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # turn video to grayscale to save computation
         faces = detector(gray)
-
+    
         if faces:
             face = faces[0]
             # face detection
@@ -171,7 +208,6 @@ if __name__ == "__main__":
             # make the starting position of the nose as the reference for all mouse movements
             if(count == 0):
                 middle = avg_point #center_top
-                count += 1
 
             
             # cv2.putText(frame, str((round(nose_pos[0],2), round(nose_pos[1],2))), (0,20), cv2.FONT_HERSHEY_SIMPLEX, 
@@ -181,7 +217,24 @@ if __name__ == "__main__":
             cv2.circle(frame, (middle[0],middle[1]), radius=0, color=(0, 0, 255), thickness=5)
 
             # movementV2(middle, avg_point, dt)  # center_top
-            movement_nose(landmarks, (1535, 863))
+
+
+            x,y = movement_nose(landmarks, (1535, 863))
+            # if len(prev_movement_pos) > 1 and (abs(prev_movement_pos[-1][0]-x) > 100 or abs(prev_movement_pos[-1][1]-y) > 100):
+            #     prev_movement_pos = []
+                
+            # prev_movement_pos.append((x,y))
+
+            # if len(prev_movement_pos) > 10:
+            #     prev_movement_pos.pop(0)
+            # prev_avg_pos = average_position(prev_movement_pos)
+            if (count == 0):
+                prev_avg_pos = (x,y)
+
+            prev_avg_pos = exponential_moving_average((x, y), prev_avg_pos, 0.25)
+
+            mouse.move(*prev_avg_pos, True, 0.1)
+
             # movementV2(middle, avg_point, dt)  # center_top
         
         dt = time.time()-prev
@@ -189,6 +242,7 @@ if __name__ == "__main__":
         key = cv2.waitKey(1)
         if key == 27: # if the esc key is pressed
             break
+        count += 1
 
     cap.release()
     cv2.destroyAllWindows()
