@@ -1,10 +1,11 @@
 # This file allows the user to control the mouse using eye movements and input from the Muse headset.
-from pygrabber.dshow_graph import FilterGraph
+#from pygrabber.dshow_graph import FilterGraph
 import cv2
 import numpy as np
 import dlib
-import mouse
+#import mouse
 import time
+from pynput.mouse import Controller, Button
 
 
 def get_available_cameras() :
@@ -34,14 +35,15 @@ def movementV2(middle, new_position, dt):
 
     print("x_movement", x_movement)
     print("y_movement", y_movement)
+    mouse = Controller()
     if abs(x_movement) >= 20 or abs(y_movement) >= 20:
-        mouse.move(x_movement * speed * dt, y_movement * speed * dt, False, 0.2)
+        mouse.move(x_movement * speed * dt, y_movement * speed * dt)
         # time.sleep(0.2)
 
 
 
 if __name__ == "__main__":
-    
+    '''
     print("Pick a device id from the list")
     print("device id: device name")
     choice = ""
@@ -51,10 +53,12 @@ if __name__ == "__main__":
     while not choice.isdigit() or choice == "":
         choice = input("choose video device id: ")
     choice = int(choice)
-    cap = cv2.VideoCapture(choice, cv2.CAP_DSHOW)
+    '''
+    choice = 0
+    cap = cv2.VideoCapture(choice)
 
     detector = dlib.get_frontal_face_detector()
-    predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face
+    predictor = dlib.shape_predictor("/Users/icansingh/Desktop/Work/Projects/Nathacks/eye-pilot/shape_predictor_68_face_landmarks.dat") # load in dataset that contains important locations on a face
 
     count = 0
     dt = 0.06

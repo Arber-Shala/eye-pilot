@@ -2,10 +2,10 @@ import brainflow
 from brainflow.board_shim import BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
 from PyQt6 import QtCore, QtWidgets
-from graph import MainGraphWindow
-from rlplot import MainTrainRLWindow
-from rlplot_live import MainLiveRLWindow
-from model import QLearner
+from .graph import MainGraphWindow
+from .rlplot import MainTrainRLWindow
+from .rlplot_live import MainLiveRLWindow
+from .model import QLearner
 import random
 import time
 import torch

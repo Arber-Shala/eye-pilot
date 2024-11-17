@@ -6,7 +6,7 @@ import pyqtgraph as pg
 import math
 import torch
 import numpy as np
-from model import QLearner
+from .model import QLearner
 import time
 
 class MainLiveRLWindow(QtWidgets.QMainWindow):
