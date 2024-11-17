@@ -16,3 +16,8 @@ Mind Pilot consists of two key components. The first component of Mind Pilot use
 # Instructions for use:
 - To execute a click command, raise eyebrows.
 - point to the position of the screen you would like the cursor to move to with your nose.
+
+# Acknowledgements
+The open source packages that we used powered our software to become what it is.
+We want to give a special thank you to Harrison, the creator of Hecatron (https://github.com/HarrisonFah/NAT_Prosthetic_RealTime). Harrison helped mentor us, teaching us how to train the
+real time reinforcement learning model he created last year at natHacks 2023!
