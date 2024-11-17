@@ -37,11 +37,46 @@ def movementV2(middle, new_position, dt):
         mouse.move(x_movement * speed * dt, y_movement * speed * dt, False, 0.2)
 
 
-# def movement_direct(middle, new_pos, init_face_rect,screen_width, screen_height, dt):
-#     x1,y1,x2, y2 = init_face_rect
-#     per_x, per_y = (new_pos[0]/abs(x2-x1), new_pos[1]/abs(y2-y1))
+def line_intersection(line1, line2):
+    xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
+    ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])
+
+    def det(a, b):
+        return a[0] * b[1] - a[1] * b[0]
+
+    div = det(xdiff, ydiff)
+    if div == 0:
+       raise Exception('lines do not intersect')
+
+    d = (det(*line1), det(*line2))
+    x = det(d, xdiff) / div
+    y = det(d, ydiff) / div
+    return x, y
+
+lerp = lambda p1, p2, t: p1 + t * (p2 - p1)
+inv_lerp = lambda x, a, b : (x - a) / (b - a)
+lndmark_get = lambda landmarks, idx : [landmarks.part(idx).x, landmarks.part(idx).y]
+
+def movement_nose(landmarks, screen_pos):
+    nose_points =  [30,31,51,35]
+    nose_top, nose_left, nose_bottom, nose_right = [lndmark_get(landmarks, idx)  for idx in nose_points]
+    nose_center = line_intersection([nose_top, nose_bottom], [nose_left, nose_right])
     
-#     mouse.move(per_x*screen_width, per_y*screen_height, True, 0.1)
+    hor_x = inv_lerp(nose_center[0], nose_right[0], nose_left[0])
+    ver_y = inv_lerp(nose_center[1], nose_bottom[1], nose_top[1])
+
+    cv2.putText(frame, f"({hor_x*100}%, {ver_y*100}%)", (0,20), cv2.FONT_HERSHEY_SIMPLEX, 
+                1, (0, 0, 0), 2, cv2.LINE_AA)
+    
+
+    norm_x = inv_lerp(hor_x, 0.25, 0.65)
+    norm_y = inv_lerp(ver_y, 0.3, 0.7)
+
+    x = norm_x*screen_pos[0]
+    y = norm_y*screen_pos[1]
+
+
+    mouse.move(x, y, True, 0.1)
 
 
 if __name__ == "__main__":    
@@ -68,10 +103,10 @@ if __name__ == "__main__":
     _, frame = cap.read()
     screen_width, screen_height, _ = frame.shape
     face_outline_points = list(range(17))
-    face_outline_points = [30,31,33,35]
+    face_outline_points = [30,31,51,35]
     # print(face_outline_points)
-    prev_face = None
     z = 0
+    face = None
     while True:
         prev = time.time()
         
@@ -124,14 +159,14 @@ if __name__ == "__main__":
 
             # test rotations
             rotZ = math.atan(landmarks.part(31).y/landmarks.part(31).x)
-            print("rotZ", rotZ)
+            # print("rotZ", rotZ)
 
             avg_point_x = int((left_point[0] + right_point[0] + center_top[0] + center_bottom[0]) / 4)
             avg_point_y = int((left_point[1] + right_point[1] + center_top[1] + center_bottom[1]) / 4)
             avg_point = (avg_point_x, avg_point_y)
 
             horizontal_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2) # create a horizontal line across the nose
-            vertical_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
+            vertical_line = cv2.line(frame, center_top, (landmarks.part(51).x, landmarks.part(51).y), (0, 255, 0), 2)
 
             # make the starting position of the nose as the reference for all mouse movements
             if(count == 0):
@@ -139,14 +174,14 @@ if __name__ == "__main__":
                 count += 1
 
             
-            #https://stackoverflow.com/questions/9734821/how-to-find-the-center-coordinate-of-rectangle
-            frame = cv2.putText(frame, str(avg_point), (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 
-                    1, (255, 255, 255), 2, cv2.LINE_AA)
+            # cv2.putText(frame, str((round(nose_pos[0],2), round(nose_pos[1],2))), (0,20), cv2.FONT_HERSHEY_SIMPLEX, 
+            #         1, (255, 255, 255), 2, cv2.LINE_AA)
 
             # https://stackoverflow.com/questions/49799057/how-to-draw-a-point-in-an-image-using-given-co-ordinate-with-python-opencv
             cv2.circle(frame, (middle[0],middle[1]), radius=0, color=(0, 0, 255), thickness=5)
 
-            movementV2(middle, avg_point, dt)  # center_top
+            # movementV2(middle, avg_point, dt)  # center_top
+            movement_nose(landmarks, (1535, 863))
             # movementV2(middle, avg_point, dt)  # center_top
         
         dt = time.time()-prev
